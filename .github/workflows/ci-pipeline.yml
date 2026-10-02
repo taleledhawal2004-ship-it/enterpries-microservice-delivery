@@ -35,6 +35,16 @@ jobs:
       - name: Test Application Health Endpoint
         run: |
           docker run -d -p 8080:8080 --name test-container enterprise-app:latest
-          sleep 3
-          curl -f http://localhost:8080/health || exit 1
+          
+          # Container up yayla thoda vel deu ani retry karu
+          echo "Waiting for container to start..."
+          sleep 5
+          
+          # Container che logs check karu (debugging sathi)
+          docker logs test-container
+
+          # Healthcheck endpoint hit karu (retry mechanism sah)
+          curl --retry 5 --retry-delay 2 --retry-connrefused -f http://localhost:8080/health || exit 1
+          
+          echo "Health check passed successfully!"
           docker stop test-container
